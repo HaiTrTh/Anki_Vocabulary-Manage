@@ -1,15 +1,12 @@
 const ANKI_CONNECT_URL = "http://localhost:8765";
-
+ const xlsx = require('xlsx');
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));  // This line is unnecessary
 // // AnkiConnect endpoint
 
 // Deck and model names
-const DECK_NAME = "CHINA_APEX_LANGUAGE-TEST";
-const MODEL_NAME = "Basic"; // Ensure this model has 7 fields
 
 // Sample vocabulary data (you can replace this with the actual data)
 
-//  const xlsx = require('xlsx');
-//   const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 async function addNoteToAnki(noteFields) {
     // Use relative paths to reference the media files in Anki's collection.media folder
     const imagePath = `${noteFields[0]}.png`;  // Reference the image file (just the filename)
@@ -90,11 +87,28 @@ async function addVocabulariesFromExcel(filePath) {
         count++;
     }
     console.log(`Total vocabularies added to Anki: ${count}`);  // Log the total count
-
 }
 
+document.getElementById('addNoteButton').addEventListener('click', async () => {
+    const deskName = document.getElementById('deskName').value;
+    const fileInput = document.getElementById('filePath');
+    const filePath = fileInput.files[0];
+
+    if (!deskName || !filePath) {
+        alert("Please enter both Desk Name and select a file.");
+        return;
+    }
+    console.log(filePath.name);
+
+    DECK_NAME = deskName; // Set the desk name dynamically
+
+    // Call the function to add vocabularies from Excel
+    await addVocabulariesFromExcel(filePath.name);
+});
+
+
 // Replace 'your_file.xlsx' with the actual path to your Excel file
-// addVocabulariesFromExcel('600 vocabulary common.xlsx');
+//  addVocabulariesFromExcel('600 vocabulary common.xlsx');
 
 const DELETE_TAG = "Chinese"; // Tag used to identify vocabulary notes to delete
 async function deleteAllVocabularyNotes() {
@@ -146,6 +160,7 @@ async function deleteAllVocabularyNotes() {
             console.error("Error deleting notes:", deleteResult.error);
         } else {
             console.log(`Successfully deleted ${noteIds.length} vocabulary notes.`);
+            alert(`Successfully deleted ${noteIds.length} vocabulary notes.`);
         }
     } catch (error) {
         console.error("Error communicating with AnkiConnect:", error);
@@ -155,9 +170,8 @@ async function deleteAllVocabularyNotes() {
 // Call the function to delete all vocabulary notes with the specified tag
 //    deleteAllVocabularyNotes();
 
-const DECK_NAME2 = "CHINA_APEX_LANGUAGE-TEST";  // Replace with your deck name
 
-async function deleteAllCardsInDeck() {
+async function deleteAllCardsInDeck(DECK_NAME) {
     try {
         // Fetch all notes in the deck
         const notes = await fetch('http://localhost:8765', {
@@ -169,7 +183,7 @@ async function deleteAllCardsInDeck() {
                 action: 'findNotes',
                 version: 6,
                 params: {
-                    query: `deck:"${DECK_NAME2}"` // Search for notes in the specified deck
+                    query: `deck:"${DECK_NAME}"` // Search for notes in the specified deck
                 }
             })
         }).then(response => response.json());
@@ -211,6 +225,27 @@ async function deleteAllCardsInDeck() {
         console.error('Error communicating with AnkiConnect:', error);
     }
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    const deleteButton = document.querySelector('#delete-button'); // Select the delete button by ID
+    
+    deleteButton.addEventListener('click', async () => {
+        // Show the prompt asking for the deck name
+        const DECK_NAME = prompt("Please enter the deck name to delete all cards from:");
+        
+        // Check if the user entered a deck name
+        if (DECK_NAME) {
+            // Ask for confirmation
+            if (confirm(`Are you sure you want to delete all cards from the deck "${DECK_NAME}"?`)) {
+                await deleteAllCardsInDeck(DECK_NAME); // Call the function to delete cards
+            } else {
+                console.log('Deletion cancelled.');
+            }
+        } else {
+            console.log('No deck name provided.');
+        }
+    });
+});
 
 // Call the function to delete all cards in the specified deck
 // deleteAllCardsInDeck();
