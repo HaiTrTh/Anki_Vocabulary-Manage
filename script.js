@@ -1,11 +1,11 @@
 const ANKI_CONNECT_URL = "http://localhost:8765";
- const xlsx = require('xlsx');
-const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));  // This line is unnecessary
+//  const xlsx = require('xlsx');
+// const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));  // This line is unnecessary
 // // AnkiConnect endpoint
-
 // Deck and model names
 
 // Sample vocabulary data (you can replace this with the actual data)
+ 
 
 async function addNoteToAnki(noteFields) {
     // Use relative paths to reference the media files in Anki's collection.media folder
@@ -17,7 +17,7 @@ async function addNoteToAnki(noteFields) {
     // Create a note object with the required fields
     const note = {
         deckName: DECK_NAME,
-        modelName: MODEL_NAME,
+        modelName: "Basic",
         fields: {
             IMG: `<img src="${imagePath}">`,  // Embed the image in the card
             TEXT: noteFields[1] || "N/A",
@@ -71,40 +71,62 @@ async function addNoteToAnki(noteFields) {
 //         addNoteToAnki(vocab);
 //     });
 // }
-
 // // Call the function to add all vocabularies
 //  addVocabularyToAnki();
 
-async function addVocabulariesFromExcel(filePath) {
-    const workbook = xlsx.readFile(filePath);
-    const sheetName = workbook.SheetNames[0];
-    const sheet = workbook.Sheets[sheetName];
-    const vocabularies = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-    console.log(vocabularies);
-    let count = 0;
-    for (const vocab of vocabularies.slice(1)) { // skip header row
-        await addNoteToAnki(vocab);
-        count++;
-    }
-    console.log(`Total vocabularies added to Anki: ${count}`);  // Log the total count
+async function addVocabulariesFromExcel(file) {
+    const reader = new FileReader();  // Create a FileReader instance
+
+    reader.onload = async function (e) {
+    try {
+            // const workbook = XLSX.readFile(filePath);
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const vocabularies = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+            console.log(vocabularies);
+            let count = 0;
+            for (const vocab of vocabularies.slice(1)) { // skip header row
+                await addNoteToAnki(vocab);
+                count++;
+            }
+            console.log(`Total vocabularies added to Anki: ${count}`);  // Log the total count
+        }
+        catch (error) {
+            console.error("Error processing the Excel file:", error);
+            alert("An error occurred while processing the Excel file.");
+        }
+    };
+    reader.onerror = function () {
+        console.error("File could not be read! Code " + reader.error.code);
+        alert("Failed to read file. Please try again or check the file format.");
+    };
+
+    // Read the file as an ArrayBuffer
+    reader.readAsArrayBuffer(file);
+    
 }
 
+
+
 document.getElementById('addNoteButton').addEventListener('click', async () => {
-    const deskName = document.getElementById('deskName').value;
-    const fileInput = document.getElementById('filePath');
-    const filePath = fileInput.files[0];
+        const deskName = document.getElementById('deskName').value;
+        const fileInput = document.getElementById('filePath');
+        const filePath = fileInput.files[0];
 
-    if (!deskName || !filePath) {
-        alert("Please enter both Desk Name and select a file.");
-        return;
-    }
-    console.log(filePath.name);
+        if (!deskName || !filePath) {
+            alert("Please enter both Desk Name and select a file.");
+            return;
+        }
+        console.log(filePath.name);
 
-    DECK_NAME = deskName; // Set the desk name dynamically
+        DECK_NAME = deskName; // Set the desk name dynamically
 
-    // Call the function to add vocabularies from Excel
-    await addVocabulariesFromExcel(filePath.name);
-});
+        // Call the function to add vocabularies from Excel
+        await addVocabulariesFromExcel(filePath);
+    });
+
 
 
 // Replace 'your_file.xlsx' with the actual path to your Excel file

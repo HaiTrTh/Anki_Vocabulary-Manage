@@ -24,42 +24,11 @@
         <!-- Result Messages -->
         <div id="result"></div>
     </div>
-    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script> -->
-    
-    <!-- <script>
-      window.onload = function() {
-           if (typeof XLSX !== 'undefined') {
-               console.log('XLSX library is loaded');
-           } else {
-               console.log('Error: XLSX library is not loaded');
-           }
-       }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.2/xlsx.full.min.js"></script>
 
-       // Example function to check if the file is being loaded correctly
-       document.getElementById('addNoteButton').addEventListener('click', function() {
-           const fileInput = document.getElementById('filePath');
-           const file = fileInput.files[0];
-
-           if (!file) {
-               alert('Please select a file first');
-               return;
-           }
-
-           const reader = new FileReader();
-
-           reader.onload = function(e) {
-               const data = e.target.result;
-               const workbook = XLSX.read(data, { type: 'binary' });
-               const sheetName = workbook.SheetNames[0];
-               const sheet = workbook.Sheets[sheetName];
-               const json = XLSX.utils.sheet_to_json(sheet);
-               console.log(json); // Output the content of the sheet
-           };
-
-           reader.readAsBinaryString(file);
-       });
-   </script> -->
-
+   <script>
+    console.log("XLSX loaded:", typeof XLSX !== 'undefined');
+    </script>
     <script src="script.js"></script>
    
 </body>
