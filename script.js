@@ -5,7 +5,7 @@ const ANKI_CONNECT_URL = "http://localhost:8765";
 // Deck and model names
 
 // Sample vocabulary data (you can replace this with the actual data)
- 
+
 
 async function addNoteToAnki(noteFields) {
     // Use relative paths to reference the media files in Anki's collection.media folder
@@ -64,7 +64,6 @@ async function addNoteToAnki(noteFields) {
         console.error("Error communicating with AnkiConnect:", error);
     }
 }
-
 // // Function to loop through all vocabularies and add them to Anki
 // function addVocabularyToAnki() {
 //     vocabularies.forEach(vocab => {
@@ -76,13 +75,12 @@ async function addNoteToAnki(noteFields) {
 
 async function addVocabulariesFromExcel(file) {
     const reader = new FileReader();  // Create a FileReader instance
-
     reader.onload = async function (e) {
     try {
             // const workbook = XLSX.readFile(filePath);
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: 'array' });
-            const sheetName = workbook.SheetNames[0];
+            const sheetName = workbook.SheetNames[2];
             const sheet = workbook.Sheets[sheetName];
             const vocabularies = XLSX.utils.sheet_to_json(sheet, { header: 1 });
             console.log(vocabularies);
